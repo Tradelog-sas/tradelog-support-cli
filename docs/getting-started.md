@@ -50,9 +50,12 @@ Para actualizarlo más adelante: `brew upgrade tradelog`.
 
 ## Paso 3 — Descargar el SDK
 
-Desde la carpeta raíz de tu proyecto iOS:
+> ⚠️ **Corre el comando desde la carpeta raíz de tu proyecto iOS.** El SDK se
+> descarga en `Tradelog/` **relativo a donde ejecutes el comando** — si lo corres
+> en otro lado, ahí quedará el folder.
 
 ```bash
+cd /ruta/a/tu/proyecto-ios
 tradelog install --api-key tlk_xxxxxxxx --tenant 4be6e386-....
 ```
 
@@ -211,13 +214,8 @@ Luego en Xcode limpia y reconstruye (SPM) o corre `pod install` (CocoaPods).
 
 ## Cómo funciona
 
-```
-tradelog install
-  └─ broker (valida tu API key contra tu tenant)
-       └─ token de descarga de corta vida
-            └─ baja TradelogSupport.xcframework (binario) del registry
-                 └─ lo deja como paquete local para SPM / CocoaPods
-```
+`tradelog install` descarga el **`TradelogSupport.xcframework`** (binario) y lo
+deja como paquete local listo para SPM o CocoaPods.
 
-Tu **API key gatea la descarga**. En runtime, el SDK vuelve a validar la API key
-antes de abrir el chat. No necesitas credenciales de AWS en ningún momento.
+Tu **API key controla la descarga** y el SDK la vuelve a validar en runtime antes
+de abrir el chat. No necesitas credenciales de AWS en ningún momento.

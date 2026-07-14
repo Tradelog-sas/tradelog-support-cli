@@ -63,16 +63,9 @@ TradeLogSwiftUIContainer(
 
 ## Cómo funciona
 
-```
-tradelog install
-  → broker (Basic auth: tenant + api key)      ← valida la api key
-  → token de CodeArtifact (efímero)
-  → GET <registry>/tradelog/TradelogSupport/<version>.zip  (Bearer)
-  → extrae los .xcframework a ./Tradelog/TradelogSupport
-```
-
-La api key controla la descarga (gate de install). En runtime, el SDK vuelve a
-validar la api key. Sin AWS del lado del cliente.
+`tradelog install` descarga el `TradelogSupport.xcframework` (binario) y lo deja
+como paquete local listo para SPM/CocoaPods. Tu API key controla la descarga y el
+SDK la vuelve a validar en runtime. No necesitas credenciales de AWS.
 
 ## Desarrollo
 
