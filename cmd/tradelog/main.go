@@ -1,8 +1,8 @@
 // Command tradelog is the Tradelog SDK installer.
 //
-// El cliente se autentica con su API KEY de Tradelog (la misma del runtime) y
-// el CLI descarga el TradelogSupport.xcframework binario para integrarlo por
-// SwiftPM o CocoaPods — sin credenciales AWS, sin configurar registries.
+// The client authenticates with their Tradelog API key (the same one used at
+// runtime) and the CLI downloads the binary TradelogSupport.xcframework to
+// integrate via SwiftPM or CocoaPods — no AWS credentials, no registry setup.
 package main
 
 import (
@@ -12,7 +12,7 @@ import (
 	"github.com/Tradelog-sas/tradelog-support-cli/internal/app"
 )
 
-// version se inyecta en build (-ldflags "-X main.version=...").
+// version is injected at build time (-ldflags "-X main.version=...").
 var version = "dev"
 
 func main() {
@@ -32,7 +32,7 @@ func main() {
 	case "help", "--help", "-h":
 		app.Usage()
 	default:
-		fmt.Fprintf(os.Stderr, "comando desconocido: %q\n\n", os.Args[1])
+		fmt.Fprintf(os.Stderr, "unknown command: %q\n\n", os.Args[1])
 		app.Usage()
 		os.Exit(2)
 	}

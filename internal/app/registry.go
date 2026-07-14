@@ -11,18 +11,18 @@ import (
 	"time"
 )
 
-// packageScope y packageName identifican el paquete Swift en CodeArtifact.
+// packageScope and packageName identify the Swift package in the registry.
 const (
 	packageScope = "tradelog"
 	packageName  = "TradelogSupport"
 )
 
-// releaseURL arma la URL del recurso del paquete en el registry Swift.
+// releaseURL builds the package resource URL in the Swift registry.
 func releaseURL(registryEndpoint string) string {
 	return strings.TrimRight(registryEndpoint, "/") + "/" + packageScope + "/" + packageName
 }
 
-// resolveVersion devuelve la versión pedida, o la más reciente si es "" / "latest".
+// resolveVersion returns the requested version, or the latest if "" / "latest".
 func resolveVersion(registryEndpoint, token, want string) (string, error) {
 	if want != "" && want != "latest" {
 		return want, nil
@@ -35,21 +35,21 @@ func resolveVersion(registryEndpoint, token, want string) (string, error) {
 	client := &http.Client{Timeout: 30 * time.Second}
 	resp, err := client.Do(req)
 	if err != nil {
-		return "", fmt.Errorf("no se pudo listar versiones: %w", err)
+		return "", fmt.Errorf("could not list versions: %w", err)
 	}
 	defer resp.Body.Close()
 	if resp.StatusCode != http.StatusOK {
-		return "", fmt.Errorf("registry respondió %d al listar versiones", resp.StatusCode)
+		return "", fmt.Errorf("registry responded %d while listing versions", resp.StatusCode)
 	}
 
 	var payload struct {
 		Releases map[string]json.RawMessage `json:"releases"`
 	}
 	if err := json.NewDecoder(resp.Body).Decode(&payload); err != nil {
-		return "", fmt.Errorf("lista de versiones ilegible: %w", err)
+		return "", fmt.Errorf("unreadable version list: %w", err)
 	}
 	if len(payload.Releases) == 0 {
-		return "", fmt.Errorf("no hay versiones publicadas del SDK")
+		return "", fmt.Errorf("no published SDK versions found")
 	}
 
 	latest := ""
@@ -61,7 +61,7 @@ func resolveVersion(registryEndpoint, token, want string) (string, error) {
 	return latest, nil
 }
 
-// compareVersions compara "2026.508.85" numéricamente por componente. >0 si a>b.
+// compareVersions compares "2026.508.85" numerically per component. >0 if a>b.
 func compareVersions(a, b string) int {
 	pa, pb := strings.Split(a, "."), strings.Split(b, ".")
 	for i := 0; i < len(pa) || i < len(pb); i++ {
@@ -82,7 +82,7 @@ func compareVersions(a, b string) int {
 	return 0
 }
 
-// downloadZip baja el archivo del release al path dado, mostrando progreso.
+// downloadZip downloads the release archive to the given path, showing progress.
 func downloadZip(registryEndpoint, token, version, dst string) error {
 	url := releaseURL(registryEndpoint) + "/" + version + ".zip"
 	req, _ := http.NewRequest(http.MethodGet, url, nil)
@@ -92,11 +92,11 @@ func downloadZip(registryEndpoint, token, version, dst string) error {
 	client := &http.Client{Timeout: 10 * time.Minute}
 	resp, err := client.Do(req)
 	if err != nil {
-		return fmt.Errorf("descarga falló: %w", err)
+		return fmt.Errorf("download failed: %w", err)
 	}
 	defer resp.Body.Close()
 	if resp.StatusCode != http.StatusOK {
-		return fmt.Errorf("registry respondió %d al descargar %s", resp.StatusCode, version)
+		return fmt.Errorf("registry responded %d while downloading %s", resp.StatusCode, version)
 	}
 
 	f, err := os.Create(dst)
@@ -105,15 +105,15 @@ func downloadZip(registryEndpoint, token, version, dst string) error {
 	}
 	defer f.Close()
 
-	pw := &progressWriter{total: resp.ContentLength, label: "  descargando"}
+	pw := &progressWriter{total: resp.ContentLength, label: "  downloading"}
 	if _, err := io.Copy(io.MultiWriter(f, pw), resp.Body); err != nil {
-		return fmt.Errorf("escribiendo descarga: %w", err)
+		return fmt.Errorf("writing download: %w", err)
 	}
 	pw.done()
 	return nil
 }
 
-// progressWriter imprime progreso simple de descarga.
+// progressWriter prints a simple download progress line.
 type progressWriter struct {
 	total   int64
 	written int64

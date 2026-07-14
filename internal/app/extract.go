@@ -9,9 +9,9 @@ import (
 	"strings"
 )
 
-// extractStripRoot descomprime zipPath dentro de destDir, quitando el primer
-// segmento de ruta ("tradelog.TradelogSupport/") para dejar el paquete limpio.
-// Preserva permisos y symlinks (importante para los .xcframework).
+// extractStripRoot unzips zipPath into destDir, dropping the first path segment
+// ("tradelog.TradelogSupport/") to leave a clean package. Preserves permissions
+// and symlinks (important for the .xcframework bundles).
 func extractStripRoot(zipPath, destDir string) (int, error) {
 	zr, err := zip.OpenReader(zipPath)
 	if err != nil {
@@ -32,9 +32,9 @@ func extractStripRoot(zipPath, destDir string) (int, error) {
 		}
 
 		target := filepath.Join(destAbs, rel)
-		// Defensa zip-slip: el destino debe quedar dentro de destDir.
+		// Zip-slip guard: the target must stay inside destDir.
 		if !strings.HasPrefix(target, destAbs+string(os.PathSeparator)) && target != destAbs {
-			return files, fmt.Errorf("entrada de zip fuera de destino: %s", f.Name)
+			return files, fmt.Errorf("zip entry outside destination: %s", f.Name)
 		}
 
 		info := f.FileInfo()
@@ -65,7 +65,7 @@ func stripFirstSegment(name string) string {
 	name = strings.TrimPrefix(name, "/")
 	i := strings.IndexByte(name, '/')
 	if i < 0 {
-		return "" // entrada de nivel raíz (la carpeta contenedora): se ignora
+		return "" // top-level entry (the container folder): ignored
 	}
 	return name[i+1:]
 }
@@ -99,14 +99,14 @@ func writeSymlink(f *zip.File, target, destAbs string) error {
 	}
 	link := string(dest)
 
-	// Defensa zip-slip vía symlink: el destino del link debe quedar dentro de
-	// destAbs. Rechazamos rutas absolutas y cualquier ".." que escape.
+	// Zip-slip via symlink: the link target must stay inside destAbs. Reject
+	// absolute paths and any ".." that escapes.
 	if filepath.IsAbs(link) {
-		return fmt.Errorf("symlink absoluto rechazado: %s -> %s", f.Name, link)
+		return fmt.Errorf("rejected absolute symlink: %s -> %s", f.Name, link)
 	}
 	resolved := filepath.Clean(filepath.Join(filepath.Dir(target), link))
 	if resolved != destAbs && !strings.HasPrefix(resolved, destAbs+string(os.PathSeparator)) {
-		return fmt.Errorf("symlink escapa el destino: %s -> %s", f.Name, link)
+		return fmt.Errorf("symlink escapes destination: %s -> %s", f.Name, link)
 	}
 
 	if err := os.MkdirAll(filepath.Dir(target), 0o755); err != nil {

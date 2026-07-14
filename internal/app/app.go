@@ -8,54 +8,54 @@ import (
 	"strings"
 )
 
-// Usage imprime la ayuda general.
+// Usage prints the general help.
 func Usage() {
-	fmt.Print(`tradelog — instalador del SDK de soporte de Tradelog para iOS
+	fmt.Print(`tradelog — installer for the Tradelog iOS support chat SDK
 
-USO:
-  tradelog install [flags]     Descarga e integra TradelogSupport.xcframework
-  tradelog version             Muestra la versión del CLI
-  tradelog help                Muestra esta ayuda
+USAGE:
+  tradelog install [flags]     Download and integrate TradelogSupport.xcframework
+  tradelog version             Show the CLI version
+  tradelog help                Show this help
 
 INSTALL:
-  Autentícate con tu API KEY de Tradelog (la misma que usas en el SDK). El CLI
-  descarga el framework binario — no necesitas credenciales de AWS.
+  Authenticate with your Tradelog API key (the same one you use in the SDK). The
+  CLI downloads the binary framework — no AWS credentials required.
 
   Flags:
-    --api-key   API key de Tradelog       (o env TRADELOG_API_KEY)
-    --tenant    Tenant / company id        (o env TRADELOG_TENANT_ID)
-    --version   Versión del SDK            (default: latest)
-    --dest      Carpeta destino            (default: ./Tradelog)
-    --pods      Genera también un .podspec para CocoaPods
-    --broker-url  Override del broker      (avanzado)
+    --api-key   Tradelog API key         (or env TRADELOG_API_KEY)
+    --tenant    Tenant / company id       (or env TRADELOG_TENANT_ID)
+    --version   SDK version               (default: latest)
+    --dest      Destination folder        (default: ./Tradelog)
+    --pods      Also generate a .podspec for CocoaPods
+    --broker-url  Broker override         (advanced)
 
-  Ejemplo:
+  Example:
     tradelog install --api-key tlk_xxx --tenant 4be6e386-...
 
 `)
 }
 
-// Install ejecuta el flujo completo: auth → descarga → extrae → configura.
+// Install runs the full flow: auth → download → extract → configure.
 func Install(args []string) error {
 	fs := flag.NewFlagSet("install", flag.ContinueOnError)
-	apiKey := fs.String("api-key", os.Getenv("TRADELOG_API_KEY"), "API key de Tradelog")
+	apiKey := fs.String("api-key", os.Getenv("TRADELOG_API_KEY"), "Tradelog API key")
 	tenant := fs.String("tenant", os.Getenv("TRADELOG_TENANT_ID"), "Tenant / company id")
-	version := fs.String("version", "latest", "Versión del SDK (o 'latest')")
-	dest := fs.String("dest", "Tradelog", "Carpeta destino")
-	pods := fs.Bool("pods", false, "Generar .podspec para CocoaPods")
-	brokerURL := fs.String("broker-url", DefaultBrokerURL, "URL del broker de tokens")
+	version := fs.String("version", "latest", "SDK version (or 'latest')")
+	dest := fs.String("dest", "Tradelog", "Destination folder")
+	pods := fs.Bool("pods", false, "Generate a .podspec for CocoaPods")
+	brokerURL := fs.String("broker-url", DefaultBrokerURL, "Token broker URL")
 	if err := fs.Parse(args); err != nil {
 		return err
 	}
 
 	if *apiKey == "" {
-		return fmt.Errorf("falta --api-key (o env TRADELOG_API_KEY)")
+		return fmt.Errorf("missing --api-key (or env TRADELOG_API_KEY)")
 	}
 	if *tenant == "" {
-		return fmt.Errorf("falta --tenant (o env TRADELOG_TENANT_ID)")
+		return fmt.Errorf("missing --tenant (or env TRADELOG_TENANT_ID)")
 	}
 
-	fmt.Println("→ Autenticando con tu API key…")
+	fmt.Println("→ Authenticating with your API key…")
 	tok, err := fetchToken(*brokerURL, *tenant, *apiKey)
 	if err != nil {
 		return err
@@ -65,7 +65,7 @@ func Install(args []string) error {
 	if err != nil {
 		return err
 	}
-	fmt.Printf("→ Versión: %s\n", resolved)
+	fmt.Printf("→ Version: %s\n", resolved)
 
 	tmp, err := os.CreateTemp("", "tradelog-sdk-*.zip")
 	if err != nil {
@@ -80,7 +80,7 @@ func Install(args []string) error {
 	}
 
 	pkgDir := filepath.Join(*dest, packageName)
-	fmt.Printf("→ Extrayendo en %s …\n", pkgDir)
+	fmt.Printf("→ Extracting into %s …\n", pkgDir)
 	if err := os.RemoveAll(pkgDir); err != nil {
 		return err
 	}
@@ -93,13 +93,13 @@ func Install(args []string) error {
 	}
 
 	if _, err := os.Stat(filepath.Join(pkgDir, "Package.swift")); err != nil {
-		return fmt.Errorf("el paquete extraído no tiene Package.swift (%d archivos)", n)
+		return fmt.Errorf("extracted package has no Package.swift (%d files)", n)
 	}
 
 	xcDir := findXcframeworkDir(pkgDir)
 	if *pods {
 		if err := writePodspec(pkgDir, xcDir, resolved); err != nil {
-			return fmt.Errorf("generando podspec: %w", err)
+			return fmt.Errorf("generating podspec: %w", err)
 		}
 	}
 
@@ -107,8 +107,8 @@ func Install(args []string) error {
 	return nil
 }
 
-// findXcframeworkDir devuelve la carpeta (relativa a pkgDir) que contiene los
-// .xcframework, para el podspec. Vacío si no se encuentra.
+// findXcframeworkDir returns the folder (relative to pkgDir) that contains the
+// .xcframework bundles, for the podspec. Empty if none is found.
 func findXcframeworkDir(pkgDir string) string {
 	found := ""
 	_ = filepath.Walk(pkgDir, func(path string, info os.FileInfo, err error) error {
@@ -125,7 +125,7 @@ func findXcframeworkDir(pkgDir string) string {
 	return found
 }
 
-// writePodspec genera un TradelogSupport.podspec que vendoriza los xcframeworks.
+// writePodspec generates a TradelogSupport.podspec that vendors the xcframeworks.
 func writePodspec(pkgDir, xcDir, version string) error {
 	if xcDir == "" {
 		xcDir = "."
@@ -133,7 +133,7 @@ func writePodspec(pkgDir, xcDir, version string) error {
 	spec := fmt.Sprintf(`Pod::Spec.new do |s|
   s.name             = 'TradelogSupport'
   s.version          = '%s'
-  s.summary          = 'Tradelog support chat SDK (binario).'
+  s.summary          = 'Tradelog support chat SDK (binary).'
   s.homepage         = 'https://tradelog.click'
   s.license          = { :type => 'Commercial' }
   s.author           = 'Tradelog'
@@ -147,20 +147,20 @@ end
 
 func printNextSteps(pkgDir, version string, pods bool) {
 	abs, _ := filepath.Abs(pkgDir)
-	fmt.Printf("\n✓ SDK %s instalado en %s\n\n", version, pkgDir)
-	fmt.Println("SIGUIENTE — SwiftPM (recomendado):")
-	fmt.Println("  Xcode ▸ File ▸ Add Package Dependencies… ▸ Add Local… ▸ selecciona:")
+	fmt.Printf("\n✓ SDK %s installed at %s\n\n", version, pkgDir)
+	fmt.Println("NEXT — SwiftPM (recommended):")
+	fmt.Println("  Xcode ▸ File ▸ Add Package Dependencies… ▸ Add Local… ▸ select:")
 	fmt.Printf("    %s\n", abs)
-	fmt.Println("  Luego agrega el producto 'TradelogSupport' a tu target.")
+	fmt.Println("  Then add the 'TradelogSupport' product to your target.")
 	if pods {
-		fmt.Println("\nSIGUIENTE — CocoaPods:")
-		fmt.Println("  En tu Podfile:")
+		fmt.Println("\nNEXT — CocoaPods:")
+		fmt.Println("  In your Podfile:")
 		fmt.Printf("    pod 'TradelogSupport', :path => '%s'\n", pkgDir)
-		fmt.Println("  Luego: pod install")
+		fmt.Println("  Then: pod install")
 	}
-	fmt.Println("\nEN CÓDIGO:")
+	fmt.Println("\nIN CODE:")
 	fmt.Println("  import TradelogSupport")
 	fmt.Println("  try TradeLogSdk.initialize(options: TradeLogSdkOptions(apiKey: \"tlk_…\", tenantId: \"…\", environment: .production))")
-	fmt.Println("  // Presenta TradeLogSwiftUIContainer(onCloseRequested:onBackButtonRequested:) para abrir el chat")
+	fmt.Println("  // Present TradeLogSwiftUIContainer(onCloseRequested:onBackButtonRequested:) to open the chat")
 	fmt.Println()
 }
