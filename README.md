@@ -13,6 +13,12 @@ the binary `TradelogSupport.xcframework`, ready to integrate via **SwiftPM** or
 brew install tradelog-sas/tap/tradelog
 ```
 
+Update to the latest version:
+
+```bash
+brew upgrade tradelog
+```
+
 ## Usage
 
 ```bash

@@ -189,7 +189,15 @@ That's it — the SDK brings up the full support chat.
 
 ---
 
-## Updating the SDK
+## Updating
+
+**Update the CLI** (via Homebrew):
+
+```bash
+brew upgrade tradelog
+```
+
+**Update the SDK**:
 
 ```bash
 tradelog install                 # download the latest version
