@@ -5,6 +5,8 @@ con su **API key de Tradelog** (la misma del runtime) y el CLI descarga el
 `TradelogSupport.xcframework` binario listo para integrar por **SwiftPM** o
 **CocoaPods** — sin credenciales AWS, sin configurar registries.
 
+> 📖 **Guía completa de integración:** [docs/getting-started.md](docs/getting-started.md)
+
 ## Instalación
 
 ```bash
