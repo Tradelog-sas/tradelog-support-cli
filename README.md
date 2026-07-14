@@ -1,45 +1,48 @@
 # TradelogCLI
 
-Instalador del **SDK de soporte de Tradelog para iOS**. El cliente se autentica
-con su **API key de Tradelog** (la misma del runtime) y el CLI descarga el
-`TradelogSupport.xcframework` binario listo para integrar por **SwiftPM** o
-**CocoaPods** — sin credenciales AWS, sin configurar registries.
+Installer for the **Tradelog iOS support chat SDK**. Clients authenticate with
+their **Tradelog API key** (the same one used at runtime) and the CLI downloads
+the binary `TradelogSupport.xcframework`, ready to integrate via **SwiftPM** or
+**CocoaPods** — no AWS credentials, no registry setup.
 
-> 📖 **Guía completa de integración:** [docs/getting-started.md](docs/getting-started.md)
+> 📖 **Full integration guide:** [docs/getting-started.md](docs/getting-started.md)
 
-## Instalación
+## Installation
 
 ```bash
 brew install tradelog-sas/tap/tradelog
 ```
 
-## Uso
+## Usage
 
 ```bash
 tradelog install --api-key tlk_xxx --tenant 4be6e386-...
-# o con variables de entorno:
+# or with environment variables:
 export TRADELOG_API_KEY=tlk_xxx
 export TRADELOG_TENANT_ID=4be6e386-...
 tradelog install
 ```
 
+> Run it from your iOS project's root folder — the SDK is downloaded into
+> `Tradelog/` relative to your current directory.
+
 Flags:
 
-| Flag | Default | Descripción |
+| Flag | Default | Description |
 |------|---------|-------------|
-| `--api-key` | `$TRADELOG_API_KEY` | API key de Tradelog |
+| `--api-key` | `$TRADELOG_API_KEY` | Tradelog API key |
 | `--tenant` | `$TRADELOG_TENANT_ID` | Tenant / company id |
-| `--version` | `latest` | Versión del SDK |
-| `--dest` | `Tradelog` | Carpeta destino |
-| `--pods` | `false` | Genera también un `.podspec` |
-| `--broker-url` | broker prod | Override (avanzado) |
+| `--version` | `latest` | SDK version |
+| `--dest` | `Tradelog` | Destination folder |
+| `--pods` | `false` | Also generate a `.podspec` |
+| `--broker-url` | prod broker | Override (advanced) |
 
-El comando deja un Swift package local en `Tradelog/TradelogSupport/`.
+The command leaves a local Swift package at `Tradelog/TradelogSupport/`.
 
 ### SwiftPM
 
-Xcode ▸ **File ▸ Add Package Dependencies… ▸ Add Local…** ▸ selecciona
-`Tradelog/TradelogSupport` ▸ agrega el producto `TradelogSupport` a tu target.
+Xcode ▸ **File ▸ Add Package Dependencies… ▸ Add Local…** ▸ select
+`Tradelog/TradelogSupport` ▸ add the `TradelogSupport` product to your target.
 
 ### CocoaPods (`--pods`)
 
@@ -47,7 +50,7 @@ Xcode ▸ **File ▸ Add Package Dependencies… ▸ Add Local…** ▸ seleccio
 pod 'TradelogSupport', :path => 'Tradelog/TradelogSupport'
 ```
 
-## En código
+## In code
 
 ```swift
 import TradelogSupport
@@ -55,22 +58,22 @@ import TradelogSupport
 try TradeLogSdk.initialize(options: TradeLogSdkOptions(
     apiKey: "tlk_…", tenantId: "…", environment: .production))
 
-// Presenta el chat:
+// Present the chat:
 TradeLogSwiftUIContainer(
     onCloseRequested: { … },
     onBackButtonRequested: { … })
 ```
 
-## Cómo funciona
+## How it works
 
-`tradelog install` descarga el `TradelogSupport.xcframework` (binario) y lo deja
-como paquete local listo para SPM/CocoaPods. Tu API key controla la descarga y el
-SDK la vuelve a validar en runtime. No necesitas credenciales de AWS.
+`tradelog install` downloads the `TradelogSupport.xcframework` (binary) and leaves
+it as a local package ready for SPM/CocoaPods. Your API key gates the download and
+the SDK re-validates it at runtime. No AWS credentials required.
 
-## Desarrollo
+## Development
 
 ```bash
-make build       # binario local
+make build       # local binary
 make test        # vet + tests
-make release     # cross-compila macOS arm64/amd64 + tar.gz + shasums (Homebrew)
+make release     # cross-compile macOS arm64/amd64 + tar.gz + shasums (Homebrew)
 ```
