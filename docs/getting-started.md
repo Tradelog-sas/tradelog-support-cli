@@ -31,7 +31,7 @@ Verify:
 tradelog version
 ```
 
-To update it later: `brew upgrade tradelog`.
+To update it later: `brew upgrade tradelog-sas/tap/tradelog`.
 
 ---
 
@@ -194,7 +194,7 @@ That's it — the SDK brings up the full support chat.
 **Update the CLI** (via Homebrew):
 
 ```bash
-brew upgrade tradelog
+brew upgrade tradelog-sas/tap/tradelog
 ```
 
 **Update the SDK**:

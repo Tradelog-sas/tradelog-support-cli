@@ -16,7 +16,7 @@ brew install tradelog-sas/tap/tradelog
 Update to the latest version:
 
 ```bash
-brew upgrade tradelog
+brew upgrade tradelog-sas/tap/tradelog
 ```
 
 ## Usage
